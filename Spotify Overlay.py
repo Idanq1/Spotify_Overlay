@@ -1,11 +1,12 @@
-import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from PIL import Image, ImageTk, ImageChops
 import tkinter as tk
 import configparser
-import urllib3
-from PIL import Image, ImageTk, ImageChops
-import io
 import pyautogui
+import spotipy
+import urllib3
+import time
+import io
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -62,11 +63,15 @@ class Overlay:
         self.mouse_pos = pyautogui.position()
         if self.mouse_in_box():
             self.hide()
-            self.win.after(100, self.updater)
             while self.mouse_in_box():
                 self.mouse_pos = pyautogui.position()
 
-        data = sp_data.current_user_playing_track()
+        while True:
+            data = sp_data.current_user_playing_track()
+            if not data:
+                time.sleep(5)
+                continue
+            break
         if not data["is_playing"]:  # Song is paused
             self.hide()  # Hide overlay
         elif self.is_hidden:
@@ -92,25 +97,15 @@ class Overlay:
         self.win.after(700, self.updater)
 
     def mouse_in_box(self):
-        # print("*****************")
-        # print(self.mouse_pos.x)
-        # print(self.mouse_pos.y)
-        # print("----")
-        # print(self.win.geometry())
         win_x = int(self.win.geometry().split("+")[1])
         win_y = int(self.win.geometry().split("+")[2])
         win_x_ofs = int(self.win.geometry().split("x")[0])
         win_y_ofs = int(self.win.geometry().split("x")[1].split("+")[0])
-        # print("*****************")
         tl = (win_x, win_y)
         br = (win_x + win_x_ofs, win_y + win_y_ofs)
         if (tl[0] < self.mouse_pos.x < br[0]) and (tl[1] < self.mouse_pos.y < br[1]):
             return True
         return False
-        # print(f"Top left- {win_x, win_y}")
-        # print(f"Top right- {win_x + win_x_ofs, win_y}")
-        # print(f"Bottom left- {win_x, win_y + win_y_ofs}")
-        # print(f"Bottom right- {win_x + win_x_ofs, win_y + win_y_ofs}")
 
     def hide(self):
         self.win.withdraw()
@@ -128,9 +123,12 @@ class Overlay:
         inv_accent = self.get_inv_img_cc(small)
         self.lab.img = img
         self.lab_img_url = url
+        text_color = (0, 0, 0)
+        if accent[0] <= 20 and accent[1] <= 20 and accent[2] <= 20:
+            text_color = (255, 255, 255)
         self.lab.configure(textvariable=self.tk_var, image=img, compound=img_pos,
                            bg=self.rgb2hex(accent[0], accent[1], accent[2]),
-                           fg=self.rgb2hex(inv_accent[0], inv_accent[1], inv_accent[2]))
+                           fg=self.rgb2hex(text_color[0], text_color[1], text_color[2]))  # self.rgb2hex(inv_accept[0], inv_accept[1], inv_accept[2]
 
     def ensure_image_state(self, url):
         if url != self.lab_img_url:

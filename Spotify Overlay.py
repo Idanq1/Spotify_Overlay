@@ -124,7 +124,7 @@ class Overlay:
         self.lab.img = img
         self.lab_img_url = url
         text_color = (0, 0, 0)
-        if accent[0] <= 20 and accent[1] <= 20 and accent[2] <= 20:
+        if accent[0] <= 65 and accent[1] <= 65 and accent[2] <= 65:
             text_color = (255, 255, 255)
         self.lab.configure(textvariable=self.tk_var, image=img, compound=img_pos,
                            bg=self.rgb2hex(accent[0], accent[1], accent[2]),
